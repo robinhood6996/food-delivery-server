@@ -62,6 +62,13 @@ async function run() {
             const result = await foodCollection.findOne(query);
             res.json(result);
         })
+        app.get('/order/:email', async (req, res) => {
+            const email = req.params;
+            const query = { email: email };
+            const order = orderCollection.find(query);
+            const result = await order.toArray();
+            res.json(result);
+        })
 
         //Users API
         app.post('/users', async (req, res) => {
@@ -89,10 +96,24 @@ async function run() {
             res.json(result);
         });
 
-        app.get('/user/:email', async (req, res) => {
+        app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
-            const result = await userCollection.findOne(query);
+            const user = await userCollection.findOne(query);
+            let isAdmin = false;
+            if (user?.role === 'admin') {
+                isAdmin = true;
+            }
+            res.json({ admin: isAdmin });
+        })
+
+
+        app.put('/user/admin', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const updateDoc = { $set: { role: 'admin' } }
+            const result = await userCollection.updateOne(filter, updateDoc);
+
             res.json(result);
         })
 
